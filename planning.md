@@ -10,6 +10,7 @@
 ## Domain
 
 <!-- What domain did you choose? Why is this knowledge valuable and hard to find through official channels? -->
+This project focuses on creating an Unofficial Guide to the UCF Computer Science Student Experience. The guide helps students find information about courses, degree planning, clubs, hackathons, internships, career resources, and campus opportunities that are relevant to computer science majors. This knowledge is difficult to find because it is scattered across many sources, including UCF department websites, student organization pages, career services resources, and community discussions on Reddit and Discord. A RAG system can bring these sources together and provide personalized recommendations and answers in one place.
 
 ---
 
@@ -20,25 +21,22 @@
 
 | # | Source | Description | URL or location |
 |---|--------|-------------|-----------------|
-| 1 | | | |
-| 2 | | | |
-| 3 | | | |
-| 4 | | | |
-| 5 | | | |
-| 6 | | | |
-| 7 | | | |
-| 8 | | | |
-| 9 | | | |
-| 10 | | | |
+| 1 | UCF Computer Science BS Program | Official degree requirements, curriculum, and career pathways for CS students. | https://www.ucfedu/degree/computer-science-bs/ |
+| 2 | UCF Computer Science Department | Department information, academic resources, and opportunities for CS students. | https://www.csucf.edu/ |
+| 3 | UCF CS Student Organizations | Information about ACM, AI@UCF, Knight Hacks, Cyber Defense Club, and Programming Team. | https://wwwcs.ucf.edu/student-organizations/ |
+| 4 | CECS Student Organizations | Directory of engineering and technology clubs available to students. | https://www.cecs.ucf.educurrent-students/student-organizations/ |
+| 5 | ACM@UCF | Workshops, technical projects, networking events, and professional development opportunities. | https://ucf.acm.org/ |
+| 6 | Knight Hacks | Hackathons, mentorship programs, software development projects, and workshops. | https://knighthacks.org/ |
+| 7 | KnightConnect | Student organization directory and campus event platform. | https://osi.ucf.eduregistered-student-organizations-rsos/get-involved/ |
+| 8 |Dixon Career Development Center|Career advising, internship preparation, career fairs, and resume resources|https://career.ucf.edu/ |
+| 9 | UCF Handshake | Internship, co-op, and job opportunities available to UCF students. | https://career.ucf.edu/resources/handshake/ |
+| 10 | r/UCF Reddit Community | Student discussions about classes, professors, clubs, internships, and campus life. | https://www.redditcom/r/ucf/ |
 
 ---
 
 ## Chunking Strategy
 
-<!-- How will you split documents into chunks?
-     State your chunk size (in tokens or characters), overlap size, and explain why those
-     numbers fit the structure of your documents.
-     A review-heavy corpus warrants different chunking than a long FAQ. -->
+My documents include a mix of long informational pages, club descriptions, career resources, and Reddit discussions. A chunk size of 500 characters is large enough to preserve context while remaining focused on a specific topic. A 100-character overlap helps prevent important information from being split between chunks and improves retrieval when key details span chunk boundaries.
 
 **Chunk size:**
 
@@ -50,11 +48,7 @@
 
 ## Retrieval Approach
 
-<!-- Which embedding model are you using (e.g., all-MiniLM-L6-v2 via sentence-transformers)?
-     How many chunks will you retrieve per query (top-k)?
-     If you were deploying this for real users and cost wasn't a constraint, what tradeoffs
-     would you weigh in choosing a different embedding model — context length, multilingual
-     support, accuracy on domain-specific text, latency? -->
+The all-MiniLM-L6-v2 model provides good semantic search performance while being lightweight and fast enough for a student project. Retrieving the top 5 chunks should provide enough context for accurate responses without overwhelming the language model. In a production system, I would consider larger embedding models such as BGE-large or OpenAI embeddings for improved retrieval accuracy, especially for longer documents and more complex queries, although this would increase latency and cost.
 
 **Embedding model:**
 
@@ -73,11 +67,11 @@
 
 | # | Question | Expected answer |
 |---|----------|-----------------|
-| 1 | | |
-| 2 | | |
-| 3 | | |
-| 4 | | |
-| 5 | | |
+| 1 |What clubs should a student interested in software engineering join? |Knight Hacks, ACM, and Google Developer Student Club should be recommended. |
+| 2 |Where can UCF students find internship opportunities? |Handshake and the Dixon Career Development Center should be identified as primary resources. |
+| 3 |Which UCF organization focuses on artificial intelligence? |AI@UCF should be recommended. |
+| 4 |What resources help students prepare for careers in tech? |Career fairs, Handshake, resume reviews, workshops, and career advising should be mentioned. |
+| 5 |Which club is best known for hackathons and software |Knight Hacks should be identified. |
 
 ---
 
@@ -87,9 +81,9 @@
      Consider: noisy or inconsistent documents, missing source attribution, off-topic
      retrieval, chunks that split key information across boundaries. -->
 
-1.
+1.Information may become outdated because student organizations, events, officers, and internship resources change frequently throughout the year.
 
-2.
+2.Some documents contain overlapping information, which may cause the retrieval system to return redundant chunks rather than diverse sources.
 
 ---
 
@@ -101,7 +95,28 @@
      You can use ASCII art, a Mermaid diagram, or embed a sketch as an image.
      You'll use this diagram as context when prompting AI tools to implement each stage. -->
 
----
+Document Ingestion
+(UCF Websites, Clubs, Reddit)
+            |
+            v
+Chunking
+(RecursiveCharacterTextSplitter)
+            |
+            v
+Embedding + Vector Store
+(all-MiniLM-L6-v2 + ChromaDB)
+            |
+            v
+Retrieval
+(Similarity Search)
+            |
+            v
+Generation
+(GPT-5.5)
+            |
+            v
+Final Response
+
 
 ## AI Tool Plan
 
@@ -114,6 +129,8 @@
      "I'll use AI to help me code" is not a plan.
      "I'll give Claude my Chunking Strategy section and ask it to implement chunk_text()
      with my specified chunk size and overlap" is a plan. -->
+
+     I will use ChatGPT and GitHub Copilot to generate document ingestion scripts and chunking functions. I will provide my Domain, Documents, and Chunking Strategy sections and ask the AI to create code that loads web pages, extracts text, and splits documents into chunks using a 500-character chunk size with 100-character overlap. I will verify that the generated chunks match my specified strategy.
 
 **Milestone 3 — Ingestion and chunking:**
 
