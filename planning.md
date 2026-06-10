@@ -39,11 +39,19 @@ This project focuses on creating an Unofficial Guide to the UCF Computer Science
 My documents include a mix of long informational pages, club descriptions, career resources, and Reddit discussions. A chunk size of 500 characters is large enough to preserve context while remaining focused on a specific topic. A 100-character overlap helps prevent important information from being split between chunks and improves retrieval when key details span chunk boundaries.
 
 **Chunk size:**
-
+500 char
 **Overlap:**
-
+100 characters
 **Reasoning:**
-
+The source documents are a mix of long informational web pages (degree requirements, career center
+descriptions) and shorter conversational content (Reddit posts and comments). A 500-character chunk
+is large enough to capture a complete thought -- for example, a club's description or a career
+resource's purpose -- without bundling unrelated topics into the same chunk. The 100-character
+overlap prevents key information from being split invisibly at a boundary: if a sentence about
+Knight Hacks spans the end of one chunk and the start of the next, both chunks carry enough context
+for retrieval to find it. RecursiveCharacterTextSplitter was used with separators ordered
+["\n\n", "\n", ". ", " ", ""] so it prefers natural paragraph and sentence breaks over arbitrary
+character positions.
 ---
 
 ## Retrieval Approach
@@ -51,11 +59,19 @@ My documents include a mix of long informational pages, club descriptions, caree
 The all-MiniLM-L6-v2 model provides good semantic search performance while being lightweight and fast enough for a student project. Retrieving the top 5 chunks should provide enough context for accurate responses without overwhelming the language model. In a production system, I would consider larger embedding models such as BGE-large or OpenAI embeddings for improved retrieval accuracy, especially for longer documents and more complex queries, although this would increase latency and cost.
 
 **Embedding model:**
-
+all-MiniLM-L6-v2 from sentence-transformers
 **Top-k:**
-
+5
 **Production tradeoff reflection:**
-
+In a production deployment, I would weigh several factors before switching models. BGE-large-en
+or text-embedding-3-large (OpenAI) offer meaningfully higher retrieval accuracy on domain-specific
+text, but both increase latency and cost -- OpenAI embeddings require an API call per chunk at
+scale. For a UCF-specific system, a model fine-tuned on academic or student-life text would likely
+outperform a general model on edge cases where student slang or course code abbreviations appear
+in queries. I would also consider context length: all-MiniLM-L6-v2 supports up to 256 tokens,
+which is sufficient for 500-character chunks but would truncate longer passages if chunk size were
+increased. A model with a longer context window (e.g. nomic-embed-text at 8192 tokens) would give
+more headroom.
 ---
 
 ## Evaluation Plan
